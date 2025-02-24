@@ -1,19 +1,25 @@
-const express = require('express'),
-    app = express(),
-    PORT = 2500,
-    cors = require('cors'),
-    messageRoutes = require('./routes/messageRoutes'),
-    editedQaRoutes = require('./routes/qaRoutes');
+import express from 'express'
+import cors from 'cors'
+import dotenv from 'dotenv'
 
+// dotenv.config({ path: '.env' })
+dotenv.config()
+
+const app = express(),
+    PORT = 2500;
 
 app.use(cors())
 app.use(express.json())
 
-const db = require('./DL/db')
-db.connect()
+import { connect } from './db.js'
+connect()
 
-app.use('/messages', messageRoutes);
-// app.use('/qa', editedQaRoutes);
+import msgRoutes from './message/message.router.js'
+app.use('/msg', msgRoutes);
 
 
-app.listen(PORT, () => console.log(`#### Server is up in port ${PORT} ####`))
+app.listen(PORT, () => {
+    console.log(`#### Server is up in port ${PORT} ####`)
+
+    // console.log('All env vars:', process.env)
+})
