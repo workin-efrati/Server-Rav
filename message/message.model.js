@@ -5,8 +5,12 @@ const whatsappMessageSchema = new mongoose.Schema({
     sender: { type: String },
     message: { type: String, required: true },
     isQuestion: { type: Boolean, required: true },
-    isUnknown: { type: Boolean},
-    isFuq: { type: Boolean},
+    isUnknown: { type: Boolean },
+    isFuq: { type: Boolean },
+    rId: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'whatsappmsg'
+    },
 
 }, { timestamps: true });
 

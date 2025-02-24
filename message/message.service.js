@@ -27,13 +27,16 @@ async function getFuqs(date, sender) {
     return await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, sender, isFuq: true })
 }
 
-async function getFullFuq(_id) {
+async function getFullMessage(_id) {
     let msg = await getSingleMessage(_id)
     if (!msg) return {}
 
-    let { sender, date } = msg
-    let fuqs = await getFuqs(date, sender)
-    let start = fuqs[0].date, end = fuqs[fuqs.length - 1].date;
+    let { sender, date, isFuq } = msg
+    let start = date, end = date;
+    if (isFuq) {
+        let fuqs = await getFuqs(date, sender)
+        start = fuqs[0].date, end = fuqs[fuqs.length - 1].date;
+    }
     let messages = await messageDB.read({
         date: { $gte: start, $lte: new Date(end.setMinutes(end.getMinutes() + 90)) },
         $or: [
@@ -46,7 +49,7 @@ async function getFullFuq(_id) {
 }
 
 
-export default { getSingleMessage, getMessagesByDate, firstFuq, getFuqs, getFullFuq }
+export default { getSingleMessage, getMessagesByDate, firstFuq, getFuqs,  getFullMessage }
 
 
 async function firstFuq(date) {
