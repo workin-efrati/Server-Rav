@@ -16,9 +16,25 @@ async function getMessagesByDate(date) {
     if (!date) return []
 
     const { startOfDay, endOfDay } = date.startEnd();
-
     let messages = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay } })
     return messages;
+}
+
+async function getNumberOfQuestions(filter) {
+    const { from, to } = filter;
+
+    const { startOfDay } = from.startEnd();
+    const { endOfDay } = to.startEnd();
+    let data = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, isQuestion: true }, { _id: 1, date: 1 })
+    let isYear = startOfDay.getMonth() !== endOfDay.getMonth()
+    let questionNumArr = []
+    // let questionNumArr = isYear ? Array(13).fill(0) : Array(32).fill(0);
+
+    for(let d of data) {
+        let day = isYear ? d.date.getMonth() : d.date.getDate()
+        questionNumArr[day]++
+    }
+    return questionNumArr
 }
 
 async function getFuqs(date, sender) {
@@ -27,13 +43,17 @@ async function getFuqs(date, sender) {
     return await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, sender, isFuq: true })
 }
 
-async function getFullFuq(_id) {
+async function getFullMsgs(_id) {
     let msg = await getSingleMessage(_id)
     if (!msg) return {}
 
-    let { sender, date } = msg
-    let fuqs = await getFuqs(date, sender)
-    let start = fuqs[0].date, end = fuqs[fuqs.length - 1].date;
+    let { sender, date, isFuq } = msg
+    let start = date, end = date
+    if(isFuq) {
+        let fuqs = await getFuqs(date, sender)
+        start = fuqs[0].date, end = fuqs[fuqs.length - 1].date
+    }
+
     let messages = await messageDB.read({
         date: { $gte: start, $lte: new Date(end.setMinutes(end.getMinutes() + 90)) },
         $or: [
@@ -45,8 +65,16 @@ async function getFullFuq(_id) {
     return messages
 }
 
+async function updateMessage(_id, newData) {
+    return await messageDB.update({_id}, newData);
+}
 
-export default { getSingleMessage, getMessagesByDate, firstFuq, getFuqs, getFullFuq }
+async function deleteMessage(_id) {
+    return await messageDB.del({_id});
+}
+
+
+export default { getSingleMessage, getMessagesByDate, getNumberOfQuestions, firstFuq, getFuqs, getFullMsgs, updateMessage, deleteMessage }
 
 
 async function firstFuq(date) {
