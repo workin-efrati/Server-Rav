@@ -17,8 +17,8 @@ router.get('/', async (req, res) => {
 
 router.get('/amount', async (req, res) => {
     try {
-        const { date } = req.query
-        const numOfMsgs = await messageService.getNumberOfQuestions(date);
+        const { from, to } = req.query
+        const numOfMsgs = await messageService.getNumberOfQuestions(from, to);
         res.send(numOfMsgs);
 
     } catch (error) {

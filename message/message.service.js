@@ -15,20 +15,18 @@ async function getSingleMessage(_id) {
 async function getMessagesByDate(date) {
     if (!date) return []
 
-    const { startOfDay, endOfDay } = date.startEnd();
+    const { startOfDay, endOfDay } = new Date(date).startEnd();    
     let messages = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay } })
+    
     return messages;
 }
 
-async function getNumberOfQuestions(filter) {
-    const { from, to } = filter;
-
-    const { startOfDay } = from.startEnd();
-    const { endOfDay } = to.startEnd();
+async function getNumberOfQuestions(from, to) {
+    const { startOfDay } = new Date(from).startEnd();
+    const { endOfDay } = new Date(to).startEnd();
     let data = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, isQuestion: true }, { _id: 1, date: 1 })
     let isYear = startOfDay.getMonth() !== endOfDay.getMonth()
-    let questionNumArr = []
-    // let questionNumArr = isYear ? Array(13).fill(0) : Array(32).fill(0);
+    let questionNumArr = isYear ? Array(13).fill(0) : Array(32).fill(0);
 
     for(let d of data) {
         let day = isYear ? d.date.getMonth() : d.date.getDate()
