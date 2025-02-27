@@ -15,10 +15,24 @@ async function getSingleMessage(_id) {
 async function getMessagesByDate(date) {
     if (!date) return []
 
-    const { startOfDay, endOfDay } = date.startEnd();
-
+    const { startOfDay, endOfDay } = new Date(date).startEnd();    
     let messages = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay } })
+    
     return messages;
+}
+
+async function getNumberOfQuestions(from, to) {
+    const { startOfDay } = new Date(from).startEnd();
+    const { endOfDay } = new Date(to).startEnd();
+    let data = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, isQuestion: true }, { _id: 1, date: 1 })
+    let isYear = startOfDay.getMonth() !== endOfDay.getMonth()
+    let questionNumArr = isYear ? Array(13).fill(0) : Array(32).fill(0);
+
+    for(let d of data) {
+        let day = isYear ? d.date.getMonth() : d.date.getDate()
+        questionNumArr[day]++
+    }
+    return questionNumArr
 }
 
 async function getFuqs(date, sender) {
@@ -27,7 +41,7 @@ async function getFuqs(date, sender) {
     return await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, sender, isFuq: true })
 }
 
-async function getFullMessage(_id) {
+async function getFullMsgs(_id) {
     let msg = await getSingleMessage(_id)
     if (!msg) return {}
 
@@ -48,8 +62,16 @@ async function getFullMessage(_id) {
     return messages
 }
 
+async function updateMessage(_id, newData) {
+    return await messageDB.update({_id}, newData);
+}
 
-export default { getSingleMessage, getMessagesByDate, firstFuq, getFuqs,  getFullMessage }
+async function deleteMessage(_id) {
+    return await messageDB.del({_id});
+}
+
+
+export default { getSingleMessage, getMessagesByDate, getNumberOfQuestions, firstFuq, getFuqs, getFullMsgs, updateMessage, deleteMessage }
 
 
 async function firstFuq(date) {

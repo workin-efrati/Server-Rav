@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose';
 
-const editedQaSchema = new mongoose.Schema({
+const shutSchema = new mongoose.Schema({
     question: { type: String, required: true },
     answer: { type: String, required: true },
     title: { type: String, required: true },
@@ -10,6 +10,4 @@ const editedQaSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-const editedQaModel = mongoose.model('editedQa', editedQaSchema)
-
-module.exports = editedQaModel
+export const shutModel = mongoose.model('shut', shutSchema)

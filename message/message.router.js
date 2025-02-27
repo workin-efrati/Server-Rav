@@ -15,10 +15,32 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/amount', async (req, res) => {
+    try {
+        const { from, to } = req.query
+        const numOfMsgs = await messageService.getNumberOfQuestions(from, to);
+        res.send(numOfMsgs);
+
+    } catch (error) {
+        console.error(error);
+        res.status(400).send({ message: "something went wrong" });
+    }
+});
 
 router.get('/:id', async (req, res) => {
     try {
-        const msgs = await messageService.getFullMessage(req.params.id)
+        const msg = await messageService.getFullMessage(req.params.id)
+        res.send(msg);
+
+    } catch (error) {
+        console.error(error);
+        res.status(400).send({ message: "something went wrong" });
+    }
+});
+
+router.get('/:id/full', async (req, res) => {
+    try {
+        const msgs = await messageService.getFullMsgs(req.params.id)
         res.send(msgs);
 
     } catch (error) {
@@ -26,6 +48,7 @@ router.get('/:id', async (req, res) => {
         res.status(400).send({ message: "something went wrong" });
     }
 });
+
 router.get('/fuqs/:date', async (req, res) => {
     try {
         const msg = await messageService.getFuqs(req.params.date)
@@ -36,5 +59,25 @@ router.get('/fuqs/:date', async (req, res) => {
         res.status(400).send({ message: "something went wrong" });
     }
 });
+
+router.put('/:id', async (req, res) => {
+    try {
+        const msg = await messageService.updateMessage(req.params.id, req.query)
+        res.send(msg)
+
+    } catch (error) {
+        res.status(400).send({ message: "something went wrong" })
+    }
+})
+
+router.delete('/:id', async (req, res) => {
+    try {
+        await messageService.deleteMessage(req.params.id)
+        res.send(true)
+
+    } catch (error) {
+        res.status(400).send({ message: "something went wrong" })
+    }
+})
 
 export default router
