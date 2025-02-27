@@ -41,7 +41,7 @@ async function getFuqs(date, sender) {
     return await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, sender, isFuq: true })
 }
 
-async function getFullMsgs(_id) {
+async function getFullMsgs(_id,time=1) {
     let msg = await getSingleMessage(_id)
     if (!msg) return {}
 
@@ -53,7 +53,7 @@ async function getFullMsgs(_id) {
         let fuqs = await getFuqs(date, sender)
         let start = fuqs[0].date, end = fuqs[fuqs.length - 1].date;
         filter = {
-            date: { $gte: Number(start), $lte: Number(end) + (90 * 60 * 1000) },
+            date: { $gte: Number(start), $lte: Number(end) + ((30*time ) * 60 * 1000) },
             $or: [
                 { sender },
                 { sender: { $exists: false } }
@@ -67,7 +67,7 @@ async function getFullMsgs(_id) {
             { _id },
             {
                 $and: [
-                    { date: { $gte: Number(date), $lte: Number(date) + (90 * 60 * 1000) } },
+                    { date: { $gte: Number(date), $lte: Number(date) + ((30*time ) * 60 * 1000) } },
                     { isQuestion: false }
                 ]
             }]
