@@ -15,9 +15,9 @@ async function getSingleMessage(_id) {
 async function getMessagesByDate(date) {
     if (!date) return []
 
-    const { startOfDay, endOfDay } = new Date(date).startEnd();    
+    const { startOfDay, endOfDay } = new Date(date).startEnd();
     let messages = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay } })
-    
+
     return messages;
 }
 
@@ -28,7 +28,7 @@ async function getNumberOfQuestions(from, to) {
     let isYear = startOfDay.getMonth() !== endOfDay.getMonth()
     let questionNumArr = isYear ? Array(13).fill(0) : Array(32).fill(0);
 
-    for(let d of data) {
+    for (let d of data) {
         let day = isYear ? d.date.getMonth() : d.date.getDate()
         questionNumArr[day]++
     }
@@ -46,28 +46,44 @@ async function getFullMsgs(_id) {
     if (!msg) return {}
 
     let { sender, date, isFuq } = msg
-    let start = date, end = date;
+
+    let filter = {}
+
     if (isFuq) {
         let fuqs = await getFuqs(date, sender)
-        start = fuqs[0].date, end = fuqs[fuqs.length - 1].date;
+        let start = fuqs[0].date, end = fuqs[fuqs.length - 1].date;
+        filter = {
+            date: { $gte: Number(start), $lte: Number(end) + (90 * 60 * 1000) },
+            $or: [
+                { sender },
+                { sender: { $exists: false } }
+            ]
+        }
+        return await messageDB.read(filter);
     }
-    let messages = await messageDB.read({
-        date: { $gte: start, $lte: new Date(end.setMinutes(end.getMinutes() + 90)) },
+
+    filter = {
         $or: [
-            { sender },
-            { sender: { $exists: false } }
-        ]
-    })
+            { _id },
+            {
+                $and: [
+                    { date: { $gte: Number(date), $lte: Number(date) + (90 * 60 * 1000) } },
+                    { isQuestion: false }
+                ]
+            }]
+    }
+
+    let messages = await messageDB.read(filter)
 
     return messages
 }
 
 async function updateMessage(_id, newData) {
-    return await messageDB.update({_id}, newData);
+    return await messageDB.update({ _id }, newData);
 }
 
 async function deleteMessage(_id) {
-    return await messageDB.del({_id});
+    return await messageDB.del({ _id });
 }
 
 

@@ -29,7 +29,7 @@ router.get('/amount', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-        const msg = await messageService.getFullMessage(req.params.id)
+        const msg = await messageService.getFullMsgs(req.params.id)
         res.send(msg);
 
     } catch (error) {
