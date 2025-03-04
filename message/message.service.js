@@ -17,7 +17,7 @@ async function getMessagesByDate(date) {
     if (!date) return []
 
     const { startOfDay, endOfDay } = new Date(date).startEnd();
-    let messages = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay } })
+    let messages = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, isActive: true })
 
     return messages;
 }
@@ -25,13 +25,19 @@ async function getMessagesByDate(date) {
 async function getNumberOfQuestions(from, to) {
     const { startOfDay } = new Date(from).startEnd();
     const { endOfDay } = new Date(to).startEnd();
-    let data = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, isQuestion: true }, { _id: 1, date: 1 })
+    let data = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, isQuestion: true }, { _id: 1, date: 1, isActive: 1 })
     let isYear = startOfDay.getMonth() !== endOfDay.getMonth()
-    let questionNumArr = isYear ? Array(13).fill(0) : Array(32).fill(0);
+    let arrLength = isYear ? 13 : 32
+    let questionNumArr = Array(arrLength).fill({ total: 0, part: 0 });
 
     for (let d of data) {
         let day = isYear ? d.date.getMonth() : d.date.getDate()
-        questionNumArr[day]++
+        let curTotal = questionNumArr[day].total
+        questionNumArr[day] = { ...questionNumArr[day], total: curTotal + 1 }
+        if (!d.isActive) {
+            let curPart = questionNumArr[day].part
+            questionNumArr[day] = { ...questionNumArr[day], part: curPart + 1 }
+        }
     }
     return questionNumArr
 }
