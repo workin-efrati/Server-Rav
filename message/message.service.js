@@ -1,5 +1,6 @@
 import { log } from 'console'
 import messageDB from './message.controller.js'
+import shutDB from '../shut/shut.controller.js'
 
 Date.prototype.startEnd = function () {
     const targetDate = new Date(this);
@@ -41,7 +42,7 @@ async function getFuqs(date, sender) {
     return await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, sender, isFuq: true })
 }
 
-async function getFullMsgs(_id,time=1) {
+async function getFullMsgs(_id, time = 1) {
     let msg = await getSingleMessage(_id)
     if (!msg) return {}
 
@@ -53,7 +54,7 @@ async function getFullMsgs(_id,time=1) {
         let fuqs = await getFuqs(date, sender)
         let start = fuqs[0].date, end = fuqs[fuqs.length - 1].date;
         filter = {
-            date: { $gte: Number(start), $lte: Number(end) + ((30*time ) * 60 * 1000) },
+            date: { $gte: Number(start), $lte: Number(end) + ((30 * time) * 60 * 1000) },
             $or: [
                 { sender },
                 { sender: { $exists: false } }
@@ -67,7 +68,7 @@ async function getFullMsgs(_id,time=1) {
             { _id },
             {
                 $and: [
-                    { date: { $gte: Number(date), $lte: Number(date) + ((30*time ) * 60 * 1000) } },
+                    { date: { $gte: Number(date), $lte: Number(date) + ((30 * time) * 60 * 1000) } },
                     { isQuestion: false }
                 ]
             }]
@@ -76,6 +77,50 @@ async function getFullMsgs(_id,time=1) {
     let messages = await messageDB.read(filter)
 
     return messages
+}
+
+async function saveMessages(data) {
+    const { qId, aId } = data
+    if (!data || !qId || !aId) throw "data is empty"
+    const updateDocs = []
+
+    let q = await getSingleMessage(qId)
+    let a = await getSingleMessage(aId)
+
+    updateDocs.push(q, a);
+
+    let shut = {
+        date: q.date,
+        question: q.message,
+        answer: a.message,
+        messagesId: [qId, aId],
+    }
+
+
+    for (let f of data.fuq) {
+        if (!shut.fuqs) shut.fuqs = []
+
+        let qq = await getSingleMessage(f.qId)
+        let aa = await getSingleMessage(f.aId)
+
+        updateDocs.push(qq, aa);
+
+        shut.fuqs.push({
+            question: qq.message,
+            answer: aa.message,
+        })
+    };
+
+    let result = await shutDB.create(shut);
+
+    if (result) {
+        updateDocs.forEach(u => {
+            u.isActive = false
+            u.save()
+        })
+    }
+
+    return result
 }
 
 async function updateMessage(_id, newData) {
@@ -87,7 +132,10 @@ async function deleteMessage(_id) {
 }
 
 
-export default { getSingleMessage, getMessagesByDate, getNumberOfQuestions, firstFuq, getFuqs, getFullMsgs, updateMessage, deleteMessage }
+export default {
+    getSingleMessage, getMessagesByDate, getNumberOfQuestions,
+    saveMessages, firstFuq, getFuqs, getFullMsgs, updateMessage, deleteMessage
+}
 
 
 async function firstFuq(date) {

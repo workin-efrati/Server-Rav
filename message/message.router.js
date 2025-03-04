@@ -2,6 +2,15 @@ import express from 'express'
 import messageService from './message.service.js'
 const router = express.Router()
 
+router.post('/', async (req, res) => {
+    try {
+        const result = await messageService.saveMessages(req.body)
+        res.send(result)
+
+    } catch (error) {
+        res.status(400).send(error || "something went wrong" )
+    }
+})
 
 router.get('/', async (req, res) => {
     try {
@@ -31,17 +40,6 @@ router.get('/:id', async (req, res) => {
     try {
         const msg = await messageService.getFullMsgs(req.params.id,req.query.time)
         res.send(msg);
-
-    } catch (error) {
-        console.error(error);
-        res.status(400).send({ message: "something went wrong" });
-    }
-});
-
-router.get('/:id/full', async (req, res) => {
-    try {
-        const msgs = await messageService.getFullMsgs(req.params.id)
-        res.send(msgs);
 
     } catch (error) {
         console.error(error);
