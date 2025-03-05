@@ -130,11 +130,11 @@ async function saveMessages(data) {
 }
 
 async function updateMessage(_id, newData) {
-    return await messageDB.update({ _id }, newData);
+    return await messageDB.update( _id , newData);
 }
 
 async function deleteMessage(_id) {
-    return await messageDB.del({ _id });
+    return await messageDB.del( _id );
 }
 
 

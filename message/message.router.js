@@ -8,7 +8,7 @@ router.post('/', async (req, res) => {
         res.send(result)
 
     } catch (error) {
-        res.status(400).send(error || "something went wrong" )
+        res.status(400).send(error.message || 'error')
     }
 })
 
@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(400).send({ message: "something went wrong" });
+        res.status(400).send(error.message || 'error')
     }
 });
 
@@ -60,11 +60,12 @@ router.get('/fuqs/:date', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     try {
-        const msg = await messageService.updateMessage(req.params.id, req.query)
+        const msg = await messageService.updateMessage(req.params.id, req.body)
         res.send(msg)
 
     } catch (error) {
-        res.status(400).send({ message: "something went wrong" })
+        console.error(error);
+        res.status(400).send(error.message || 'error')
     }
 })
 
@@ -74,6 +75,7 @@ router.delete('/:id', async (req, res) => {
         res.send(true)
 
     } catch (error) {
+        console.error(error);
         res.status(400).send({ message: "something went wrong" })
     }
 })
