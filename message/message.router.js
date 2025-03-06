@@ -38,12 +38,24 @@ router.get('/amount', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-        const msg = await messageService.getFullMsgs(req.params.id,req.query.time)
+        const msg = await messageService.getFullMsgs(req.params.id, req.query.time)
         res.send(msg);
 
     } catch (error) {
         console.error(error);
         res.status(400).send({ message: "something went wrong" });
+    }
+});
+
+router.get('/:id/nav', async (req, res) => {
+    try {
+        const {nav} = req.query, id=req.params.id;
+        const msg = await messageService.getNavMsg(id,nav!=0)
+        res.send(msg);
+
+    } catch (error) {
+        console.error(error);
+        res.status(400).send(error);
     }
 });
 

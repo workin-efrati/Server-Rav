@@ -85,6 +85,23 @@ async function getFullMsgs(_id, time = 1) {
     return messages
 }
 
+async function getNavMsg(_id, isNext = true) {
+
+    let msg = await getSingleMessage(_id)
+    if (!msg) return {}
+    const date = msg.date
+    const { startOfDay, endOfDay } = new Date(date).startEnd();
+    let message = await messageDB.read({
+        date: { $gte: isNext ? Number(new Date(date)) : startOfDay, $lte: isNext ? endOfDay : Number(new Date(date)) },
+        isQuestion: true,
+        isActive: true,
+        $or: [{ isFuq: { $exists: false } }, { isFuq: false }],
+        _id: { $ne: _id }
+    }, { select: '_id', sort: isNext ? 1 : -1, limit: 1 })
+
+    return message[0]?._id
+}
+
 async function saveMessages(data) {
     const { qId, aId } = data
     if (!data || !qId || !aId) throw "data is empty"
@@ -130,17 +147,18 @@ async function saveMessages(data) {
 }
 
 async function updateMessage(_id, newData) {
-    return await messageDB.update( _id , newData);
+    return await messageDB.update(_id, newData);
 }
 
 async function deleteMessage(_id) {
-    return await messageDB.del( _id );
+    return await messageDB.del(_id);
 }
 
 
 export default {
     getSingleMessage, getMessagesByDate, getNumberOfQuestions,
-    saveMessages, firstFuq, getFuqs, getFullMsgs, updateMessage, deleteMessage
+    saveMessages, firstFuq, getFuqs, getFullMsgs, updateMessage, deleteMessage,
+    getNavMsg
 }
 
 
