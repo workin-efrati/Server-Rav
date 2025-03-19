@@ -120,7 +120,7 @@ async function saveMessages(data) {
     }
 
 
-    for (let f of data.fuq) {
+    for (let f of data.fuq || []) {
         if (!shut.fuqs) shut.fuqs = []
 
         let qq = await getSingleMessage(f.qId)
