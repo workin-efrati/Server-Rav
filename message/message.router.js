@@ -50,7 +50,7 @@ router.get('/:id', async (req, res) => {
 router.get('/:id/nav', async (req, res) => {
     try {
         const {nav} = req.query, id=req.params.id;
-        const msg = await messageService.getNavMsg(id,nav!=0)
+        const msg = await messageService.getNavMsg(id,nav==1)
         res.send(msg);
 
     } catch (error) {
