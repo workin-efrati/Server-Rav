@@ -150,8 +150,11 @@ async function updateMessage(_id, newData) {
     return await messageDB.update(_id, newData);
 }
 
-async function deleteMessage(_id) {
-    return await messageDB.del(_id);
+async function deleteMessage(ids) {
+    for(let id of ids){
+        await messageDB.del(id);
+    }
+    return true;
 }
 
 

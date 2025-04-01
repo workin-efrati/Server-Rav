@@ -83,7 +83,8 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     try {
-        await messageService.deleteMessage(req.params.id)
+        const { ids } = req.body
+        await messageService.deleteMessage(ids)
         res.send(true)
 
     } catch (error) {
