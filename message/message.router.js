@@ -38,7 +38,7 @@ router.get('/amount', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-        const msg = await messageService.getFullMsgs(req.params.id, req.query.time)
+        const msg = await messageService.getFullMsgs(req.params.id, req.query)
         res.send(msg);
 
     } catch (error) {
@@ -72,6 +72,7 @@ router.get('/fuqs/:date', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     try {
+        
         const msg = await messageService.updateMessage(req.params.id, req.body)
         res.send(msg)
 
@@ -84,6 +85,17 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         await messageService.deleteMessage(req.params.id)
+        res.send(true)
+
+    } catch (error) {
+        console.error(error);
+        res.status(400).send({ message: "something went wrong" })
+    }
+})
+
+router.delete('/', async (req, res) => {
+    try {
+        await messageService.deleteMessage(req.body)
         res.send(true)
 
     } catch (error) {

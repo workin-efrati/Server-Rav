@@ -48,7 +48,8 @@ async function getFuqs(date, sender) {
     return await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, sender, isFuq: true })
 }
 
-async function getFullMsgs(_id, time = 1) {
+async function getFullMsgs(_id, params) {
+    const {time =1 , isQuestion} = params
     let msg = await getSingleMessage(_id)
     if (!msg) return {}
 
@@ -63,9 +64,11 @@ async function getFullMsgs(_id, time = 1) {
             date: { $gte: Number(start), $lte: Number(end) + ((30 * time) * 60 * 1000) },
             $or: [
                 { sender },
-                { sender: { $exists: false } }
+                { sender: { $exists: false } },
+                { $and: [ {sender: 'ברוך אפרתי' } ,{ isQuestion: false } ]}
             ]
         }
+        if(isQuestion) filter.isQuestion= false
         return await messageDB.read(filter);
     }
 
@@ -150,8 +153,11 @@ async function updateMessage(_id, newData) {
     return await messageDB.update(_id, newData);
 }
 
-async function deleteMessage(_id) {
-    return await messageDB.del(_id);
+async function deleteMessage(ids=[]) {
+    if(!ids) throw 'ids is not array'
+    for(id of ids){
+        await messageDB.del(id);
+    }
 }
 
 
