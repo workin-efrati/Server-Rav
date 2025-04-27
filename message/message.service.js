@@ -78,7 +78,8 @@ async function getFullMsgs(_id, params) {
             {
                 $and: [
                     { date: { $gte: Number(date), $lte: Number(date) + ((30 * time) * 60 * 1000) } },
-                    { isQuestion: false }
+                    { isQuestion: false },
+                    { isActive: true }
                 ]
             }]
     }
@@ -155,7 +156,7 @@ async function updateMessage(_id, newData) {
 
 async function deleteMessage(ids=[]) {
     if(!ids) throw 'ids is not array'
-    for(id of ids){
+    for(let id of ids){
         await messageDB.del(id);
     }
 }
