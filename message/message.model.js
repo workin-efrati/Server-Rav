@@ -9,10 +9,10 @@ const whatsappMessageSchema = new mongoose.Schema({
     isFuq: { type: Boolean },
     rId: {
         type: mongoose.SchemaTypes.ObjectId,
-        ref: 'whatsappmsg'
+        ref: 'whatsappmsg_e'
     },
     isActive: { type: Boolean, default:true },
 
 }, { timestamps: true });
 
-export const whatsappMessagesModel = mongoose.model('whatsappmsg', whatsappMessageSchema)
+export const whatsappMessagesModel = mongoose.model('whatsappmsg_e', whatsappMessageSchema)
