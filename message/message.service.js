@@ -33,7 +33,7 @@ async function getNumberOfQuestions(from, to) {
     for (let d of data) {
         let day = isYear ? d.date.getMonth() : d.date.getDate()
         let curTotal = questionNumArr[day].total
-        questionNumArr[day] = { ...questionNumArr[day], total: curTotal + 1 }
+        questionNumArr[day] = { ...questionNumArr[day],index:day, total: curTotal + 1 }
         if (!d.isActive) {
             let curPart = questionNumArr[day].part
             questionNumArr[day] = { ...questionNumArr[day], part: curPart + 1 }
