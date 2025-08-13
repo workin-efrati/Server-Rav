@@ -17,7 +17,7 @@ async function getMessagesByDate(date) {
     if (!date) return []
 
     const { startOfDay, endOfDay } = new Date(date).startEnd();
-    let messages = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, isActive: true , isFuq: { $exists: false } })
+    let messages = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, isActive: true })//, isFuq: { $exists: false } })
 
     return messages;
 }
