@@ -17,7 +17,15 @@ async function getMessagesByDate(date) {
     if (!date) return []
 
     const { startOfDay, endOfDay } = new Date(date).startEnd();
-    let messages = await messageDB.read({ date: { $gte: startOfDay, $lte: endOfDay }, isActive: true })//, isFuq: { $exists: false } })
+    let messages = await messageDB.read({
+        date: { $gte: startOfDay, $lte: endOfDay }, isActive: true,
+        $or: [
+            {
+                $expr: { $eq: [{ $year: "$date" }, 2023] }, isFuq: { $exists: false }
+            },
+            { $expr: { $ne: [{ $year: "$date" }, 2023] } }
+        ]
+    })
 
     return messages;
 }
@@ -33,7 +41,7 @@ async function getNumberOfQuestions(from, to) {
     for (let d of data) {
         let day = isYear ? d.date.getMonth() : d.date.getDate()
         let curTotal = questionNumArr[day].total
-        questionNumArr[day] = { ...questionNumArr[day],index:day, total: curTotal + 1 }
+        questionNumArr[day] = { ...questionNumArr[day], index: day, total: curTotal + 1 }
         if (!d.isActive) {
             let curPart = questionNumArr[day].part
             questionNumArr[day] = { ...questionNumArr[day], part: curPart + 1 }
@@ -49,7 +57,7 @@ async function getFuqs(date, sender) {
 }
 
 async function getFullMsgs(_id, params) {
-    const {time =1 , isQuestion} = params
+    const { time = 1, isQuestion } = params
     let msg = await getSingleMessage(_id)
     if (!msg) return {}
 
@@ -65,10 +73,10 @@ async function getFullMsgs(_id, params) {
             $or: [
                 { sender },
                 { sender: { $exists: false } },
-                { $and: [ {sender: 'ברוך אפרתי' } ,{ isQuestion: false } ]}
+                { $and: [{ sender: 'ברוך אפרתי' }, { isQuestion: false }] }
             ]
         }
-        if(isQuestion) filter.isQuestion= false
+        if (isQuestion) filter.isQuestion = false
         return await messageDB.read(filter);
     }
 
@@ -154,9 +162,9 @@ async function updateMessage(_id, newData) {
     return await messageDB.update(_id, newData);
 }
 
-async function deleteMessage(ids=[]) {
-    if(!ids) throw 'ids is not array'
-    for(let id of ids){
+async function deleteMessage(ids = []) {
+    if (!ids) throw 'ids is not array'
+    for (let id of ids) {
         await messageDB.del(id);
     }
 }
